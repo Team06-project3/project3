@@ -12,8 +12,19 @@ struct file_page
 	어차피 PTE의 dirty bit가 있는데  */
 
 	// file_backup 정보를 필드로 두어도 될듯함
+	
+	struct file *file;
+	off_t ofs;
+	size_t read_bytes;
+	size_t zero_bytes;
+	
 };
-
+struct lazy_load_arg {
+	struct file *file;
+	off_t ofs;
+	size_t read_bytes;
+	size_t zero_bytes;
+};
 void vm_file_init(void);
 bool file_backed_initializer(struct page *page, enum vm_type type, void *kva);
 void *do_mmap(void *addr, size_t length, int writable,

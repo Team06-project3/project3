@@ -3,6 +3,7 @@
 #include <stdbool.h>
 #include "threads/palloc.h"
 #include "lib/kernel/hash.h"
+#include "threads/synch.h"
 
 enum vm_type
 {
@@ -70,6 +71,7 @@ struct page
 	//spt용 hash_elem
 	struct hash_elem hash_elem;
 
+	size_t mapped_page_count;
 	/* 타입별 데이터는 union에 바인딩됩니다.
 	 * 각 함수는 현재 union을 자동으로 감지합니다. */
 	union
@@ -121,6 +123,7 @@ struct supplemental_page_table
 struct frame_table
 {
 	struct list frame_list;
+	struct lock ft_lock; 
 };
 
 

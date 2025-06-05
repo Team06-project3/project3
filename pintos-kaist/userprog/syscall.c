@@ -127,11 +127,12 @@ void syscall_handler(struct intr_frame *f UNUSED)
 	case SYS_DUP2:
 		f->R.rax = sys_dup2(arg1, arg2);
 		break;
-	// case SYS_MMAP:
-	// 	f->R.rax = sys_mmap(arg1, arg2, arg3, arg4, arg5);
-	// 	break;
-	// case SYS_MUNMAP:
-	// 	break;
+	case SYS_MMAP:
+        f->R.rax = mmap(f->R.rdi, f->R.rsi, f->R.rdx, f->R.r10, f->R.r8);
+        break;	
+    case SYS_MUNMAP:
+        munmap(f->R.rdi);
+        break;
 	default:
 		thread_exit();
 		break;
@@ -183,15 +184,34 @@ void check_buffer(const void *buffer, unsigned size, bool write)
 	}
 }
 /* addr은 mmap으로 할당받은 시작주소 */
-void sys_munmap(void *addr)
+void munmap(void *addr)
 {
-	/** TODO: mmap으로 매핑된 모든 페이지를 없애야함
-	 * 1. SPT에서 제거
-	 * 2. 물리 페이지에서도 제거
-	 * 3. 매핑 카운트나 page 구조체 내의 카운트를 사용해서 제거
-	 */
+    do_munmap(addr);
 }
 
+void *mmap(void *addr, size_t length, int writable, int fd, off_t offset)
+{
+    if (!addr || addr != pg_round_down(addr))//addr가 NULL이거나 페이지 정렬이 안 돼 있으면 매핑 불가 → 실패.
+        return NULL;
+
+    if (offset != pg_round_down(offset))//파일 오프셋도 페이지 단위로 정렬되어야 함. 정렬 안 되어 있으면 실패.
+        return NULL;
+
+    if (!is_user_vaddr(addr) || !is_user_vaddr(addr + length))//시작 주소 또는 끝 주소가 유저 영역이 아니면 안 됨.
+        return NULL;
+
+    if (spt_find_page(&thread_current()->spt, addr))//시작 주소가 이미 다른 페이지로 매핑되어 있으면 실패 (겹치면 안 되니까).
+        return NULL;
+
+    struct file *f = process_get_file(fd);
+    if (f == NULL)//fd가 유효하지 않으면 실패.
+        return NULL;
+
+    if (file_length(f) == 0 || (int)length <= 0)//매핑할 파일이 비어 있거나 매핑할 길이가 0 이하이면 의미 없으므로 실패.
+        return NULL;
+
+    return do_mmap(addr, length, writable, f, offset); // 파일이 매핑된 가상 주소 반환
+}
 // void *sys_mmap(void *addr, size_t length, int writable, int fd, off_t offset)
 // {
 // 	int filesize = sys_filesize(fd);
