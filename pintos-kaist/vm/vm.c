@@ -333,7 +333,6 @@ static void *duplicate_aux(struct page *src_page, enum vm_type type)
     dst_info->read_bytes = src_info->read_bytes;
     dst_info->zero_bytes = src_info->zero_bytes;
     dst_info->writable = src_info->writable;
-    dst_info->total_length = src_info->total_length;
     dst_info->mmap_length = src_info->mmap_length;
     return dst_info;
    

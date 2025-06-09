@@ -152,31 +152,6 @@ file_backed_destroy(struct page *page)
 */
 
 
-static bool lazy_load_file(struct page *page, void *aux)
-{
-    struct file_info *fi = aux;
-    struct file *file = fi->file;
-    off_t ofs = fi->ofs;
-    uint8_t *kva = page->frame->kva;
-
-    // 파일의 남은 크기 계산 (여기서 file_length(file)은 file의 전체크기임.)
-    size_t file_remaining = file_length(file) - ofs;
-    size_t page_read_bytes = fi->read_bytes < PGSIZE ? fi->read_bytes : PGSIZE;
-    page_read_bytes = page_read_bytes < file_remaining ? page_read_bytes : file_remaining;
-    size_t page_zero_bytes = PGSIZE - page_read_bytes;
-
-    int bytes_read = file_read_at(file, kva, page_read_bytes, ofs);
-    if (bytes_read == (int)page_read_bytes) {
-        memset(kva + page_read_bytes, 0, page_zero_bytes);
-        return true;
-    } else if (bytes_read >= 0) {
-        // 파일의 끝에 도달한 경우: 읽은 만큼만 0으로 채움
-        memset(kva + bytes_read, 0, page_zero_bytes + (page_read_bytes - bytes_read));
-        return true;
-    }
-    return false;
-}
-
 void *
 do_mmap(void *addr, size_t length, int writable,
 		struct file *file, off_t offset, size_t mmap_length)
@@ -185,20 +160,17 @@ do_mmap(void *addr, size_t length, int writable,
 	struct file_info *aux = malloc(sizeof(struct file_info));
 	ASSERT(aux!=NULL);
 
-
-	increase_mapping_count(file);
 	aux->file=file_reopen(file);
 	aux->ofs=offset;
 	aux->upage=addr;
 	aux->read_bytes=length; //한 페이지당 읽어와야할 바이트 수
 	aux->zero_bytes=PGSIZE-length;
 	aux->writable=writable;
-	aux->total_length=file_length(file); 
 	aux->mmap_length = mmap_length;
 
 
 	// TODO: 지연 로딩 함수 포인터 집어넣기
-	if(!vm_alloc_page_with_initializer(VM_FILE, addr, writable, lazy_load_file, aux)) //<<어떻게 lazy_load_segemnt를 집어넣지?
+	if(!vm_alloc_page_with_initializer(VM_FILE, addr, writable, lazy_load_segment, aux)) //<<어떻게 lazy_load_segemnt를 집어넣지?
 		return NULL;
 	return addr;
 }

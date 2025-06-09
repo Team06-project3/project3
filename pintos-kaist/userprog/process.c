@@ -781,29 +781,7 @@ install_page(void *upage, void *kpage, bool writable)
 bool
 lazy_load_segment(struct page *page, void *aux)
 {
-	/* TODO: Load the segment from the file */
-	/* TODO: 이 함수는 해당 VA(가상 주소)에서 첫 페이지 폴트가 발생할 때 호출됩니다. */
-	/* TODO: 이 함수를 호출할 때 VA는 사용할 수 있습니다. */
-
-	// struct file_info *fi=aux;
-	// struct file *file=fi->file;
-	// off_t ofs = fi->ofs;
-	// uint8_t *kva = page->frame->kva;
-	// size_t page_read_bytes = fi->read_bytes < PGSIZE ? fi->read_bytes : PGSIZE;
-	// size_t page_zero_bytes = PGSIZE - page_read_bytes;
-
-	// bool success=false;
-	// //파일에서 데이터 읽기 
-	// file_seek(file, ofs);
-	// int checksize=file_read(file, kva, page_read_bytes); 
-	// if(checksize==(int)page_read_bytes){
-	// 	memset(kva+page_read_bytes, 0, page_zero_bytes);
-	// 	success=true;
-	// }
-
-	// // free(aux);
-	// //성공
-	// return success;
+	
 	struct file_info *fi = aux;
     struct file *file = fi->file;
     off_t ofs = fi->ofs;

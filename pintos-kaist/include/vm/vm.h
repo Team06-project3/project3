@@ -48,7 +48,6 @@ struct file_info
 	uint32_t zero_bytes;
 	bool writable; //필요할까?
 
-	size_t total_length;
 	size_t mmap_length;
 
 };
