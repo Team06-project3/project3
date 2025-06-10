@@ -91,6 +91,8 @@ struct frame
 	void *kva;
 	struct page *page;
 	struct list_elem frame_elem;
+
+	int r_cnt; //현재 프레임을 참조하는 페이지 수
 };
 
 /* 페이지 작업을 위한 함수 테이블입니다.

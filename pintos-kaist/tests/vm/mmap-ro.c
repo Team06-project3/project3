@@ -1,6 +1,5 @@
-/* Writes to a file through a mapping, and unmaps the file,
-   then reads the data in the file back using the read system
-   call to verify. */
+/* 매핑을 통해 파일에 데이터를 쓰고, 파일의 매핑을 해제한 후,
+  read 시스템 호출을 사용하여 파일의 데이터를 다시 읽어 확인합니다. */
 
 #include <string.h>
 #include <syscall.h>
