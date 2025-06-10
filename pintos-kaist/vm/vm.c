@@ -412,7 +412,7 @@ bool supplemental_page_table_copy(struct supplemental_page_table *dst , struct s
 		 	return false;
          continue;
       }
-
+		
       /* 2) type이 file-backed이면 */
 	  else if (type == VM_FILE)
 	  {
