@@ -183,7 +183,9 @@ void check_buffer(const void *buffer, unsigned size, bool write)
 			if(!write){
 				//이미 매핑되어 있다면	
 				uint64_t *pte = pml4e_walk(cur->pml4, (uint64_t)addr, false);
-				if (pte == NULL || !is_writable(pte))
+				struct page *cur_page = spt_find_page(&cur->spt, addr);
+				bool page_writable = cur_page->writable;
+				if (pte == NULL || (!is_writable(pte) && !page_writable))
 				{
 					sys_exit(-1); // 쓰기 권한이 없으면 종료
 				}

@@ -65,8 +65,6 @@ struct page
 
 	/* 구현 필드 */
 	bool writable;
-	// 매핑된 프레임이 스왑되어있는가??
-	bool is_swap;
 
 	//spt용 hash_elem
 	struct hash_elem hash_elem;

@@ -225,6 +225,8 @@ vm_handle_wp(struct page *page)
 {
 	
 	void * old_kva= page->frame->kva;
+	page->frame->r_cnt--;
+
 	struct frame * frame=vm_get_frame();
 	page->frame=frame;
 	frame->page=page;
@@ -235,7 +237,6 @@ vm_handle_wp(struct page *page)
 	if(!pml4_set_page(thread_current()->pml4, page->va, frame->kva, true)){
 		PANIC("TODO");
 	}
-	
 	memcpy(page->frame->kva, old_kva, PGSIZE);
 
 	return true;
@@ -377,6 +378,7 @@ bool page_table_copy(struct page* src_page, void *va){
 		page->frame=src_page->frame;
 		page->writable=src_page->writable;
 		src_page->frame->r_cnt++;
+		
 	}
 
 	if(!pml4_set_page(thread_current()->pml4, page->va, src_page->frame->kva, false)){
@@ -412,7 +414,7 @@ bool supplemental_page_table_copy(struct supplemental_page_table *dst , struct s
 		 	return false;
          continue;
       }
-		
+
       /* 2) type이 file-backed이면 */
 	  else if (type == VM_FILE)
 	  {
@@ -440,7 +442,8 @@ bool supplemental_page_table_copy(struct supplemental_page_table *dst , struct s
 
 			// 매핑된 프레임에 내용 로딩
 			struct page *dst_page = spt_find_page(dst, upage);
-			memcpy(dst_page->frame->kva, src_page->frame->kva, PGSIZE);
+			if(src_page->frame != NULL)
+				memcpy(dst_page->frame->kva, src_page->frame->kva, PGSIZE);
 	}
 	  else{
 		return false;
