@@ -252,7 +252,7 @@ void *sys_mmap(void *addr, size_t length, int writable, int fd, off_t offset)
         if (spt_find_page(&thread_current()->spt, page) != NULL)
             return MAP_FAILED;
     }
-
+	
 	/* 파일 디스크립터 fd 로 열린 파일의 offset 바이트부터 length 바이트만큼 
 	프로세스의 가상 주소 공간의 addr 부터 매핑한다. 매핑은 페이지 단위로 이루어짐
 	*/
